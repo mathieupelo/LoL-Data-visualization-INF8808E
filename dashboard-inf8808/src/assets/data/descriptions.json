@@ -1,0 +1,13 @@
+{
+    "bubble": {
+      "title": "Graphique GDP vs CO2",
+      "description1": "Ce graphique compare le GDP par habitant aux émissions de CO₂ des pays pour 2000 et 2015.",
+      "description2": "Les données sont présentées sous forme de bulles, avec la taille proportionnelle à la population."
+    },
+    "other": {
+      "title": "Autre Chart",
+      "description1": "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
+      "description2": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec justo vitae elit pharetra aliquet."
+    }
+  }
+  
