@@ -4,6 +4,7 @@ import plotly.express as px
 import dash
 from dash import Dash, dcc, html, Input, Output, callback
 import os
+import numpy as np
 
 
 BASE_DIR = os.path.dirname(__file__)                   # …/project_root/charts
@@ -29,6 +30,8 @@ def calculate_win_rate(row):
 
 def preprocess(df, year = None, patch = None):
     df = df[df['playername'].notna()]
+
+    df = df.replace(['bot', 'jng', 'mid', 'sup', 'top'], ['Bottom', 'Jungle', 'Middle', 'Support', 'Top'])
 
     df = df[['year', 'patch', 'position', 'champion', 'result']]
 
@@ -58,9 +61,8 @@ def get_plot(df):
         y = 'win_rate',
         color = 'position',
         hover_name='champion',
+        opacity = 0.95,
     )
-
-    
     return fig
 
 
@@ -79,9 +81,15 @@ def make_figure():
                   xaxis=dict(showgrid=False),
                   yaxis=dict(showgrid=False),
                   plot_bgcolor = "#2c2f3e",
-                  paper_bgcolor = "#96a0b5",
-                  #font = {"family" : "Beaufort, sans-serif" }
+                  paper_bgcolor = "#2c2f3e",
+                  legend_title = 'Champion Roles',
+                  font=dict(
+                    family="Beaufort, sans-serif",
+                    size=12,
+                    color="#fff"
+                    )
                 )
+    fig.update_traces(marker=dict(size=18))
     fig = update_axes(fig)
 
     return fig
@@ -103,15 +111,16 @@ def layout():
                 options=[{'label' : 'All', 'value' : 'All'}] + [{'label': str(y), 'value': y} for y in sorted(df['year'].dropna().unique())],
                 placeholder='Select year',
                 clearable=True,
-                style={'display':'inline-block', 'width': '200px'}
+                style={ 'width': '200px'}
             ),
             dcc.Dropdown(
                 id='patch-dropdown',
                 options=[{'label' : 'All', 'value' : 'All'}] + [{'label': str(p), 'value': p} for p in sorted(df['patch'].dropna().unique())],
                 placeholder='Select patch',
                 clearable=True,
-                style={'display':'inline-block', 'width': '200px'}
+                style={'width': '200px'}
             )],
+            style = {'display' : 'inline-block'}
         )
         ,
         dcc.Graph(id='graph', className='graph', figure=fig, config=dict(
@@ -148,9 +157,16 @@ def update_output_div(year_value, patch_value):
                   xaxis=dict(showgrid=False),
                   yaxis=dict(showgrid=False),
                   plot_bgcolor = "#2c2f3e",
-                  paper_bgcolor = "#96a0b5",
-                  #font = {"family" : "Beaufort, sans-serif"}
+                  paper_bgcolor = "#2c2f3e",
+                  legend_title = 'Champion Roles',
+                  font=dict(
+                    family="Beaufort, sans-serif",
+                    size=12,
+                    color="#fff"
+                    )
                 )
+    
+    new_fig.update_traces(marker=dict(size=18))
     
     new_fig = update_axes(new_fig)
 
