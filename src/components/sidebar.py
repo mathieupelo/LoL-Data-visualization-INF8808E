@@ -30,9 +30,15 @@ def layout():
                 n_clicks=0,
                 class_name="mb-1"
             ),
+            # dbc.NavLink(
+            #     "Team Radar",
+            #     id="nav-radar",
+            #     n_clicks=0,
+            #     class_name="mb-1"
+            # ),
             dbc.NavLink(
-                "Team Radar",
-                id="nav-radar",
+                "Champions Scatter map",
+                id="nav-scatter",
                 n_clicks=0,
                 class_name="mb-1"
             ),
