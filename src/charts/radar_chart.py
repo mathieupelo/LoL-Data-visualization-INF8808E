@@ -1,65 +1,76 @@
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output
+from dash import Dash, dcc, html, Input, Output, callback
 from utils import lol_stats
+from pathlib import Path
 
-# ——— Load Data ———
-#data_path = "D:/Poly/Project/data/2025_LoL_esports_match_data_from_OraclesElixir.csv"
-#df = pd.read_csv(data_path, low_memory=False)
-df = {}
-# ——— Preprocess & Aggregate per Team + Patch ———
-df['win'] = df['result'].map({1:1, 0:0})
 
-teams_data = (
-    df.groupby(['teamname', 'patch'])
-      .agg(
-          wins=('win', 'sum'),
-          games=('win', 'count'),
-          dragons=('dragons', 'sum'),
-          barons=('barons', 'sum'),
-          firstbloods=('firstblood', 'sum'),
-          heralds=('heralds', 'sum'),
-          void_grubs=('void_grubs', 'sum'),
-          gold15=('golddiffat15', 'mean'),
-          vision=('visionscore', 'mean')
-      )
-      .reset_index()
-)
-teams_data['win_rate'] = teams_data['wins'] / teams_data['games']
+def layout():
+    # ——— Load Data ———
+    
+    #data_path = "D:/Poly/Project/data/2025_LoL_esports_match_data_from_OraclesElixir.csv"
+    #DATA_DIR = SRC_DIR / "assets" / "data"
 
-# ——— Normalize All Metrics ———
-metrics = [
-    'dragons', 'barons', 'firstbloods', 'heralds',
-    'void_grubs', 'gold15', 'vision', 'win_rate'
-]
-norm = teams_data.copy()
-norm[metrics] = norm[metrics].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+    SRC_DIR = Path(__file__).resolve().parent.parent
+    DATA_PATH = SRC_DIR / "2024_LoL_esports_match_data_from_OraclesElixir.csv"
+    df = pd.read_csv(DATA_PATH, low_memory=False)
 
-# ——— Dash App Setup ———
-app = Dash(__name__)
-patches = ['All'] + sorted(norm['patch'].dropna().unique())
-teams = sorted(norm['teamname'].unique())
-palette = ['#445fa5', '#a1b0d8', '#256579', '#6d7a93', '#96a0b5', '#2c2f3e']
 
-app.layout = html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
-    html.H2("Team Performance Radar Chart", style={'textAlign':'center'}),
-    html.Div([
-        html.Label('Patch:', style={'marginRight':'10px'}),
-        dcc.Dropdown(id='patch', options=[{'label':p,'value':p} for p in patches], value='All',
-                     style={'width':'200px','color':'#000'}),
-        html.Label('Teams:', style={'marginLeft':'30px'}),
-        dcc.Dropdown(id='teams', options=[{'label':t,'value':t} for t in teams],
-                     value=teams[:3], multi=True,
-                     style={'width':'400px','color':'#000'})
-    ], style={'display':'flex', 'justifyContent':'center', 'paddingBottom':'20px'}),
-    dcc.Graph(id='radar-chart')
-])
 
-@app.callback(
+    # ——— Preprocess & Aggregate per Team + Patch ———
+    df['win'] = df['result'].map({1:1, 0:0})
+
+    teams_data = (
+        df.groupby(['teamname', 'patch'])
+        .agg(
+            wins=('win', 'sum'),
+            games=('win', 'count'),
+            dragons=('dragons', 'sum'),
+            barons=('barons', 'sum'),
+            firstbloods=('firstblood', 'sum'),
+            heralds=('heralds', 'sum'),
+            void_grubs=('void_grubs', 'sum'),
+            gold15=('golddiffat15', 'mean'),
+            vision=('visionscore', 'mean')
+        )
+        .reset_index()
+    )
+    teams_data['win_rate'] = teams_data['wins'] / teams_data['games']
+
+    # ——— Normalize All Metrics ———
+    metrics = [
+        'dragons', 'barons', 'firstbloods', 'heralds',
+        'void_grubs', 'gold15', 'vision', 'win_rate'
+    ]
+    norm = teams_data.copy()
+    norm[metrics] = norm[metrics].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+
+    # ——— Dash App Setup ———
+    app = Dash(__name__)
+    patches = ['All'] + sorted(norm['patch'].dropna().unique())
+    teams = sorted(norm['teamname'].unique())
+    palette = ['#445fa5', '#a1b0d8', '#256579', '#6d7a93', '#96a0b5', '#2c2f3e']
+
+    app.layout = html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
+        html.H2("Team Performance Radar Chart", style={'textAlign':'center'}),
+        html.Div([
+            html.Label('Patch:', style={'marginRight':'10px'}),
+            dcc.Dropdown(id='patch', options=[{'label':p,'value':p} for p in patches], value='All',
+                        style={'width':'200px','color':'#000'}),
+            html.Label('Teams:', style={'marginLeft':'30px'}),
+            dcc.Dropdown(id='teams', options=[{'label':t,'value':t} for t in teams],
+                        value=teams[:3], multi=True,
+                        style={'width':'400px','color':'#000'})
+        ], style={'display':'flex', 'justifyContent':'center', 'paddingBottom':'20px'}),
+        dcc.Graph(id='radar-chart')
+    ])
+
+@callback(
     Output('radar-chart','figure'),
     Input('patch','value'),
     Input('teams','value')
 )
+
 def update_radar(selected_patch, selected_teams):
     df_plot = norm if selected_patch=='All' else norm[norm['patch']==selected_patch]
     categories = [
@@ -93,6 +104,3 @@ def update_radar(selected_patch, selected_teams):
         margin=dict(t=80, b=30)
     )
     return fig
-
-if __name__=='__main__':
-    app.run(debug=True)
