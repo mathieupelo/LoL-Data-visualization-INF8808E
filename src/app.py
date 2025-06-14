@@ -31,7 +31,7 @@ app.layout = html.Div(
     prevent_initial_call=True,
 )
 
-def render_chart(n_vision, n_heat, n_radar): # <- ajouter les paramètres
+def render_chart(n_vision, n_heat, n_radar, n_scatter): # <- ajouter les paramètres
     if ctx.triggered_id == "nav-vision":
         return v_layout()
     if ctx.triggered_id == "nav-heatmap":
