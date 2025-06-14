@@ -4,54 +4,47 @@ from dash import Dash, dcc, html, Input, Output, callback
 from utils import lol_stats
 from pathlib import Path
 
+# ——— Load and Preprocess Data Globally ———
+SRC_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = SRC_DIR / "assets" / "data"
+DATA_PATH = DATA_DIR / "2024_LoL_esports_match_data_from_OraclesElixir.csv"
+df = pd.read_csv(DATA_PATH, low_memory=False)
 
-def layout():
-    # ——— Load Data ———
-    
-    #data_path = "D:/Poly/Project/data/2025_LoL_esports_match_data_from_OraclesElixir.csv"
-    #DATA_DIR = SRC_DIR / "assets" / "data"
-
-    SRC_DIR = Path(__file__).resolve().parent.parent
-    DATA_PATH = SRC_DIR / "2024_LoL_esports_match_data_from_OraclesElixir.csv"
-    df = pd.read_csv(DATA_PATH, low_memory=False)
-
-
-
-    # ——— Preprocess & Aggregate per Team + Patch ———
-    df['win'] = df['result'].map({1:1, 0:0})
-
-    teams_data = (
-        df.groupby(['teamname', 'patch'])
-        .agg(
-            wins=('win', 'sum'),
-            games=('win', 'count'),
-            dragons=('dragons', 'sum'),
-            barons=('barons', 'sum'),
-            firstbloods=('firstblood', 'sum'),
-            heralds=('heralds', 'sum'),
-            void_grubs=('void_grubs', 'sum'),
-            gold15=('golddiffat15', 'mean'),
-            vision=('visionscore', 'mean')
-        )
-        .reset_index()
+df['win'] = df['result'].map({1:1, 0:0})
+teams_data = (
+    df.groupby(['teamname', 'patch'])
+    .agg(
+        wins=('win', 'sum'),
+        games=('win', 'count'),
+        dragons=('dragons', 'sum'),
+        barons=('barons', 'sum'),
+        firstbloods=('firstblood', 'sum'),
+        heralds=('heralds', 'sum'),
+        void_grubs=('void_grubs', 'sum'),
+        gold15=('golddiffat15', 'mean'),
+        vision=('visionscore', 'mean')
     )
-    teams_data['win_rate'] = teams_data['wins'] / teams_data['games']
+    .reset_index()
+)
+teams_data['win_rate'] = teams_data['wins'] / teams_data['games']
 
-    # ——— Normalize All Metrics ———
-    metrics = [
-        'dragons', 'barons', 'firstbloods', 'heralds',
-        'void_grubs', 'gold15', 'vision', 'win_rate'
-    ]
-    norm = teams_data.copy()
-    norm[metrics] = norm[metrics].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+# ——— Shared Globals ———
+metrics = [
+    'dragons', 'barons', 'firstbloods', 'heralds',
+    'void_grubs', 'gold15', 'vision', 'win_rate'
+]
+norm = teams_data.copy()
+norm[metrics] = norm[metrics].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+palette = ['#445fa5', '#a1b0d8', '#256579', '#6d7a93', '#96a0b5', '#2c2f3e']
 
-    # ——— Dash App Setup ———
-    app = Dash(__name__)
+# ——— Dash Layout ———
+def layout():
+    # Remove the Dash app creation - we're just returning layout components
     patches = ['All'] + sorted(norm['patch'].dropna().unique())
     teams = sorted(norm['teamname'].unique())
-    palette = ['#445fa5', '#a1b0d8', '#256579', '#6d7a93', '#96a0b5', '#2c2f3e']
 
-    app.layout = html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
+    # Return the layout components directly, not wrapped in a Dash app
+    return html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
         html.H2("Team Performance Radar Chart", style={'textAlign':'center'}),
         html.Div([
             html.Label('Patch:', style={'marginRight':'10px'}),
@@ -65,12 +58,12 @@ def layout():
         dcc.Graph(id='radar-chart')
     ])
 
+# ——— Callback ———
 @callback(
     Output('radar-chart','figure'),
     Input('patch','value'),
     Input('teams','value')
 )
-
 def update_radar(selected_patch, selected_teams):
     df_plot = norm if selected_patch=='All' else norm[norm['patch']==selected_patch]
     categories = [
