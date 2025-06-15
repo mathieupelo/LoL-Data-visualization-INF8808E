@@ -49,7 +49,7 @@ team_win_df['win_rate'] = team_win_df['wins'] / team_win_df['games']
 def layout():
     patches = ['All'] + sorted(norm['patch'].dropna().unique())
     teams = sorted(norm['teamname'].unique())
-    default_teams = ['Gen.G', 'G2 Esports', 'T1'] if all(t in teams for t in ['Gen.G', 'G2 Esports', 'T1']) else teams[:3]
+    default_teams = ['Cloud9', 'G2 Esports', 'T1'] if all(t in teams for t in ['Gen.G', 'G2 Esports', 'T1']) else teams[:3]
 
     return html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
         html.H2("Team Performance Dashboard", style={'textAlign':'center'}),

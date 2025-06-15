@@ -2,7 +2,6 @@ from dash import Dash, html, dcc, Output, Input, callback, ctx
 import dash_bootstrap_components as dbc
 from components.sidebar import layout as sidebar_layout, SIDEBAR_STYLE
 from charts.role_heatmap import layout as h_layout
-from charts.vision_scatter import layout as v_layout
 from charts.radar_chart import layout as r_layout
 from charts.scatter_chart import layout as scatter_layout
 from charts.barcharts import layout as bc_layout
@@ -24,7 +23,6 @@ app.layout = html.Div(
 
 @callback(
     Output("page-content", "children"),
-    Input("nav-vision",  "n_clicks"),
     Input("nav-heatmap", "n_clicks"),
     Input("nav-radar",   "n_clicks"),
     # Ajouter les paramètres pour le callback
@@ -33,9 +31,7 @@ app.layout = html.Div(
     prevent_initial_call=True,
 )
 
-def render_chart(n_vision, n_heat, n_radar, n_scatter, n_barchart): # <- ajouter les paramètres
-    if ctx.triggered_id == "nav-vision":
-        return v_layout()
+def render_chart(n_heat, n_radar, n_scatter, n_barchart): # <- ajouter les paramètres
     if ctx.triggered_id == "nav-heatmap":
         return h_layout()
     if ctx.triggered_id == "nav-radar":
