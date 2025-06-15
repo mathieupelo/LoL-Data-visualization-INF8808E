@@ -1,7 +1,7 @@
 '''
     Contains some functions to preprocess the data used in the visualisation.
 '''
-
+import pandas as pd
 
 def round_decimals(my_df):
     '''
@@ -62,3 +62,35 @@ def sort_dy_by_yr_continent(my_df):
     '''
     # TODO : Sort the dataframe
     return None
+
+def preprocess_lollipop(df: pd.DataFrame, top_k =5)->pd.DataFrame:
+    """
+    Preprocess the data for the lollipop chart.
+
+    args:
+        - df: the dataframe to process
+        - top_k: The number of top pair duos to considere and group others pairs to other category
+    return:
+        processed dataframe
+    """
+    # Filter for bot and support roles
+    bot_sup_df = df[df['position'].isin(['bot', 'sup'])]
+
+    # Group by game and team to find pairings
+    pairings = (
+        bot_sup_df.groupby(['gameid', 'teamname'])
+        .apply(lambda x: tuple(sorted(x['champion'])))
+        .reset_index(name='pair')
+    )
+
+    # Count frequency of each unique pairing
+    pair_counts = pairings['pair'].value_counts().reset_index()
+    pair_counts.columns = ['pair', 'count']
+
+    # Get top k pairings for the pie chart
+    top_pairs = pair_counts.head(top_k)
+    other_count = pair_counts['count'].iloc[top_k:].sum()
+
+    top_pairs.insert(0,['pair','count'],['Others',other_count])
+    return top_pairs
+
