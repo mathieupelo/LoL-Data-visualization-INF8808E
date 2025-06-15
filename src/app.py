@@ -5,6 +5,7 @@ from charts.role_heatmap import layout as h_layout
 from charts.vision_scatter import layout as v_layout
 from charts.radar_chart import layout as r_layout
 from charts.scatter_chart import layout as scatter_layout
+from charts.barcharts import layout as bc_layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -28,10 +29,11 @@ app.layout = html.Div(
     Input("nav-radar",   "n_clicks"),
     # Ajouter les paramètres pour le callback
     Input("nav-scatter", "n_clicks"),
+    Input("nav-barchart", "n_clicks"),
     prevent_initial_call=True,
 )
 
-def render_chart(n_vision, n_heat, n_radar, n_scatter): # <- ajouter les paramètres
+def render_chart(n_vision, n_heat, n_radar, n_scatter, n_barchart): # <- ajouter les paramètres
     if ctx.triggered_id == "nav-vision":
         return v_layout()
     if ctx.triggered_id == "nav-heatmap":
@@ -40,6 +42,8 @@ def render_chart(n_vision, n_heat, n_radar, n_scatter): # <- ajouter les paramè
         return r_layout()
     if ctx.triggered_id == "nav-scatter":
         return scatter_layout()
+    if ctx.triggered_id == "nav-barchart":
+        return bc_layout()
     
     return v_layout()
 
