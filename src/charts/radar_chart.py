@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output, callback
+from dash import dcc, html, Input, Output, callback
 from utils import lol_stats
 from pathlib import Path
 
@@ -37,28 +37,38 @@ norm = teams_data.copy()
 norm[metrics] = norm[metrics].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
 palette = ['#445fa5', '#a1b0d8', '#256579', '#6d7a93', '#96a0b5', '#2c2f3e']
 
+# Compute team win rates per patch
+team_win_df = (
+    df.groupby(['patch', 'teamname'])
+    .agg(games=('result', 'count'), wins=('win', 'sum'))
+    .reset_index()
+)
+team_win_df['win_rate'] = team_win_df['wins'] / team_win_df['games']
+
 # ——— Dash Layout ———
 def layout():
-    # Remove the Dash app creation - we're just returning layout components
     patches = ['All'] + sorted(norm['patch'].dropna().unique())
     teams = sorted(norm['teamname'].unique())
+    default_teams = ['Gen.G', 'G2 Esports', 'T1'] if all(t in teams for t in ['Gen.G', 'G2 Esports', 'T1']) else teams[:3]
 
-    # Return the layout components directly, not wrapped in a Dash app
     return html.Div(style={'backgroundColor':'#272822','color':'#F8F8F2','fontFamily':'Cinzel, serif'}, children=[
-        html.H2("Team Performance Radar Chart", style={'textAlign':'center'}),
+        html.H2("Team Performance Dashboard", style={'textAlign':'center'}),
+
         html.Div([
-            html.Label('Patch:', style={'marginRight':'10px'}),
+            html.Label('Patch (Radar):', style={'marginRight':'10px'}),
             dcc.Dropdown(id='patch', options=[{'label':p,'value':p} for p in patches], value='All',
-                        style={'width':'200px','color':'#000'}),
+                         style={'width':'200px','color':'#000'}),
             html.Label('Teams:', style={'marginLeft':'30px'}),
             dcc.Dropdown(id='teams', options=[{'label':t,'value':t} for t in teams],
-                        value=teams[:3], multi=True,
-                        style={'width':'400px','color':'#000'})
+                         value=default_teams, multi=True,
+                         style={'width':'400px','color':'#000'})
         ], style={'display':'flex', 'justifyContent':'center', 'paddingBottom':'20px'}),
-        dcc.Graph(id='radar-chart')
+
+        dcc.Graph(id='radar-chart'),
+        dcc.Graph(id='linechart')
     ])
 
-# ——— Callback ———
+# ——— Radar Chart Callback ———
 @callback(
     Output('radar-chart','figure'),
     Input('patch','value'),
@@ -95,5 +105,37 @@ def update_radar(selected_patch, selected_teams):
         showlegend=True,
         title=f"Team Radar Comparison — Patch: {selected_patch}",
         margin=dict(t=80, b=30)
+    )
+    return fig
+
+# ——— Line Chart Callback ———
+@callback(
+    Output('linechart', 'figure'),
+    Input('teams', 'value')
+)
+def update_linechart(selected_teams):
+    fig = go.Figure()
+    for i, team in enumerate(selected_teams):
+        team_data = team_win_df[team_win_df['teamname'] == team].sort_values('patch')
+        fig.add_trace(go.Scatter(
+            x=team_data['patch'],
+            y=team_data['win_rate'],
+            mode='lines+markers',
+            name=team,
+            line=dict(color=palette[i % len(palette)], width=3),
+            marker=dict(size=6),
+            hovertemplate=f"<b>{team}</b><br>Patch: %{{x}}<br>Win Rate: %{{y:.2%}}<extra></extra>"
+        ))
+
+    fig.update_layout(
+        template='plotly_dark',
+        title='Win Rate Evolution per Team by Patch',
+        xaxis_title='Patch',
+        yaxis_title='Win Rate',
+        yaxis_tickformat='.0%',
+        plot_bgcolor='#272822',
+        paper_bgcolor='#272822',
+        font=dict(family='Cinzel, serif', color='#F8F8F2'),
+        legend=dict(orientation='h', yanchor='bottom', y=-0.3, xanchor='center', x=0.5)
     )
     return fig
