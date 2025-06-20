@@ -38,7 +38,13 @@ def layout():
             ),
             dbc.NavLink(
                 "Winrate bar chart",
-                id="nav-barchart",
+                id="nav-barchart1",
+                n_clicks=0,
+                class_name="mb-1"
+            ),
+            dbc.NavLink(
+                "Champion bar chart",
+                id="nav-barchart2",
                 n_clicks=0,
                 class_name="mb-1"
             ),

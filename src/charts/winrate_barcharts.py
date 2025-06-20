@@ -256,21 +256,8 @@ def update_winrate_chart(position_value, league_value):
     )
     new_fig.update_traces(textposition='outside')
     new_fig = update_axes(new_fig)
-    """
-    # Créer le résumé des statistiques
-    if len(filtered_df) > 0:
-        avg_winrate = filtered_df['winrate'].mean()
-        total_players = len(filtered_df)
-        top_player = filtered_df.iloc[-1]  # Dernier car trié en ascending
-        
-        stats_text = html.Div([
-            html.P(f"📊 Players shown: {total_players}"),
-            html.P(f"🏆 Best performer: {top_player['playername']} ({top_player['team']}) - {top_player['winrate']}%"),
-        ])
-    else:
-        stats_text = html.P("No data available for the selected filter.")
-    """
-    return new_fig#, stats_text
+
+    return new_fig
 
 
 # Charger et préprocesser les données au démarrage
