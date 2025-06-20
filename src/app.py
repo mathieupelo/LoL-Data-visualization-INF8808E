@@ -4,7 +4,7 @@ from components.sidebar import layout as sidebar_layout, SIDEBAR_STYLE
 from charts.role_heatmap import layout as h_layout
 from charts.radar_chart import layout as r_layout
 from charts.scatter_chart import layout as scatter_layout
-from charts.barcharts import layout as bc_layout
+from charts.winrate_barcharts import layout as bc_layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
