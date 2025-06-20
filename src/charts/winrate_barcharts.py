@@ -63,6 +63,9 @@ def preprocess(df, position_filter=None, league_filter=None):
     # Filtrer par ligue si spécifié
     if league_filter == 'major':
         df = df[df['league'].isin(['LCK', 'LEC', 'LCS'])]
+    elif league_filter in ['LCK', 'LEC', 'LCS']:
+        df = df[df['league'] == league_filter]
+
 
     # Calculer le winrate par joueur avec toutes les informations
     winrate_df = df.groupby(['league', 'teamname', 'position', 'playername'])['result'].agg(['sum', 'count']).reset_index()
@@ -88,7 +91,7 @@ def preprocess(df, position_filter=None, league_filter=None):
         final_stats = final_stats[final_stats['position'] == position_filter]
     
     # Trier par winrate décroissant et prendre le top 20
-    final_stats = final_stats.sort_values('winrate', ascending=True).tail(20)
+    final_stats = final_stats.sort_values('winrate', ascending=True).tail(10)
     
     return final_stats
 
@@ -171,7 +174,7 @@ def layout():
                 className='dropdown-menus',
                 children=[
                     html.Div([
-                        html.Label('Select Role:', style={'color': '#fff', 'margin-right': '10px'}),
+                        html.Label('Select Role:', style={'color': '#fff', 'margin-bottom': '5px'}),
                         dcc.Dropdown(
                             id='position-dropdown',
                             options=[
@@ -188,12 +191,15 @@ def layout():
                     ], style={'display': 'inline-block', 'margin-right': '20px'}),
                     
                     html.Div([
-                        html.Label('Select League:', style={'color': '#fff', 'margin-right': '10px'}),
+                        html.Label('Select League:', style={'color': '#fff', 'margin-bottom': '5px'}),
                         dcc.Dropdown(
                             id='league-dropdown',
                             options=[
                                 {'label': 'All Leagues', 'value': 'all'},
-                                {'label': 'Major Leagues (LCK, LEC, LCS)', 'value': 'major'}
+                                {'label': 'Major Leagues (LCK, LEC, LCS)', 'value': 'major'},
+                                {'label': 'LCK', 'value': 'LCK'},
+                                {'label': 'LEC', 'value': 'LEC'},
+                                {'label': 'LCS', 'value': 'LCS'}
                             ],
                             value='all',
                             clearable=False,
@@ -201,7 +207,7 @@ def layout():
                         )
                     ], style={'display': 'inline-block'})
                 ],
-                style={'margin-bottom': '20px'}
+                style={'margin-bottom': '20px', 'display': 'flex', 'flexDirection': 'column', 'alignItems': 'flex-start'}
             ),
             
             dcc.Graph(
