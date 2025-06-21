@@ -6,6 +6,7 @@ from charts.radar_chart import layout as r_layout
 from charts.scatter_chart import layout as scatter_layout
 from charts.winrate_barcharts import layout as wbc_layout
 from charts.champion_barchart import layout as cbc_layout
+from charts.winloss_barchart import layout as wlbc_layout
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -30,10 +31,11 @@ app.layout = html.Div(
     Input("nav-scatter", "n_clicks"),
     Input("nav-barchart1", "n_clicks"),
     Input("nav-barchart2", "n_clicks"),
+    Input("nav-barchart3", "n_clicks"),
     prevent_initial_call=True,
 )
 
-def render_chart(n_heat, n_radar, n_scatter, n_barchart1, n_barchart2): # <- ajouter les paramètres
+def render_chart(n_heat, n_radar, n_scatter, n_barchart1, n_barchart2, n_barchart3): # <- ajouter les paramètres
     if ctx.triggered_id == "nav-heatmap":
         return h_layout()
     if ctx.triggered_id == "nav-radar":
@@ -44,6 +46,8 @@ def render_chart(n_heat, n_radar, n_scatter, n_barchart1, n_barchart2): # <- ajo
         return wbc_layout()
     if ctx.triggered_id == "nav-barchart2":
         return cbc_layout()
+    if ctx.triggered_id == "nav-barchart3":
+        return wlbc_layout()
     
     return v_layout()
 

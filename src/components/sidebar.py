@@ -48,6 +48,12 @@ def layout():
                 n_clicks=0,
                 class_name="mb-1"
             ),
+            dbc.NavLink(
+                "WinLoss bar chart",
+                id="nav-barchart3",
+                n_clicks=0,
+                class_name="mb-1"
+            ),
             # Ajouter ici comme les autres
         ],
         vertical=True,
