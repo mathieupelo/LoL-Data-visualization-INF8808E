@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements.windows.txt requirements.in
 #
+setuptools>=65
+wheel
 brotli==1.0.9
     # via flask-compress
 click==8.1.3

@@ -19,19 +19,13 @@ def layout():
         [
             # OBLIGATOIRE : id + n_clicks=0
             dbc.NavLink(
-                "Vision Scatter",
-                id="nav-vision",
-                n_clicks=0,        # ← crée la prop n_clicks
-                class_name="mb-1"
-            ),
-            dbc.NavLink(
                 "Role Heatmap",
                 id="nav-heatmap",
                 n_clicks=0,
                 class_name="mb-1"
             ),
             dbc.NavLink(
-                 "Team Radar",
+                 "Team comparison",
                  id="nav-radar",
                  n_clicks=0,
                  class_name="mb-1"
@@ -39,6 +33,18 @@ def layout():
             dbc.NavLink(
                 "Champions Scatter map",
                 id="nav-scatter",
+                n_clicks=0,
+                class_name="mb-1"
+            ),
+            dbc.NavLink(
+                "Winrate bar chart",
+                id="nav-barchart1",
+                n_clicks=0,
+                class_name="mb-1"
+            ),
+            dbc.NavLink(
+                "Champion bar chart",
+                id="nav-barchart2",
                 n_clicks=0,
                 class_name="mb-1"
             ),
